@@ -29,6 +29,34 @@ RSpec.describe Idnow::Client do
         Idnow::Client.new(env: env, company_id: company_id, api_key: api_key)
       end
     end
+
+    context 'when a custom_hosts option is passed' do
+      let(:custom_hosts) do
+        {
+          host: 'test.host.idnow',
+          target_host: 'test.target-host.idnow'
+        }
+      end
+
+      it 'sets @host and @target_host to custom_hosts values' do
+        client = Idnow::Client.new(env: env, company_id: company_id, api_key: api_key,
+                                   custom_hosts: custom_hosts)
+
+        expect(client.instance_variable_get(:@host)).to eq 'test.host.idnow'
+        expect(client.instance_variable_get(:@target_host))
+          .to eq 'test.target-host.idnow'
+      end
+    end
+
+    context 'when no custom_hosts option is passed' do
+      it 'sets @host and @target_host to default values' do
+        client = Idnow::Client.new(env: env, company_id: company_id, api_key: api_key)
+
+        expect(client.instance_variable_get(:@host)).to eq Idnow::Host::TEST_SERVER
+        expect(client.instance_variable_get(:@target_host))
+          .to eq Idnow::TargetHost::TEST_SERVER
+      end
+    end
   end
 
   describe '#list_identifications' do
