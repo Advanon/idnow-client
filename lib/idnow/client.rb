@@ -21,7 +21,7 @@ module Idnow
 
     attr_reader :host
 
-    def initialize(env:, company_id:, api_key:, timeout: nil, custom_hosts: {})
+    def initialize(env:, company_id:, api_key:, timeout: nil, custom_hosts: nil)
       fail 'Please set env to :test or :live' unless Idnow::ENVIRONMENTS.keys.include?(env)
       fail 'Please set your company_id' if company_id.nil?
       fail 'Please set your api_key' if api_key.nil?
@@ -39,8 +39,9 @@ module Idnow
     private
 
     def set_hosts(env, custom_hosts)
-      @host        = custom_hosts[:host] || Idnow::ENVIRONMENTS[env][:host]
-      @target_host = custom_hosts[:target_host] ||
+      @host = custom_hosts.is_a?(Hash) && custom_hosts[:host] ||
+        Idnow::ENVIRONMENTS[env][:host]
+      @target_host = custom_hosts.is_a?(Hash) && custom_hosts[:target_host] ||
         Idnow::ENVIRONMENTS[env][:target_host]
     end
 
