@@ -20,6 +20,18 @@ RSpec.describe Idnow::SftpClient do
       end
     end
 
+    context 'when a proxy option is passed' do
+      let(:proxy) { double }
+      let(:sftp_client) { Idnow::SftpClient.new(host: host, username: username, password: password, proxy: proxy) }
+
+      it 'starts Net::SFTP with that timeout' do
+        expect(Net::SFTP).to receive(:start)
+          .with(expected_sftp_host, username, password: password, proxy: proxy)
+
+        sftp_client.download(path)
+      end
+    end
+
     context 'when no timeout option is passed' do
       let(:sftp_client) { Idnow::SftpClient.new(host: host, username: username, password: password) }
 
