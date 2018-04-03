@@ -17,7 +17,18 @@ RSpec.describe Idnow::Client do
         expect(Idnow::SftpClient).to receive(:new)
           .with(host: expected_sftp_host, username: company_id, password: api_key, timeout: 123)
 
-        Idnow::Client.new(env: env, company_id: company_id, api_key: api_key, timeout: 123)
+        Idnow::Client.new(env: env, company_id: company_id, api_key: api_key, options: { sftp_client_options: { timeout: 123 } })
+      end
+    end
+
+    context 'when a proxy option is passed' do
+      let(:proxy) { double }
+
+      it 'initializes Idnow::SftpClient with that proxy' do
+        expect(Idnow::SftpClient).to receive(:new)
+          .with(host: expected_sftp_host, username: company_id, password: api_key, proxy: proxy)
+
+        Idnow::Client.new(env: env, company_id: company_id, api_key: api_key, options: { sftp_client_options: { proxy: proxy } })
       end
     end
 
@@ -39,8 +50,10 @@ RSpec.describe Idnow::Client do
       end
 
       it 'sets @host and @target_host to custom_hosts values' do
-        client = Idnow::Client.new(env: env, company_id: company_id, api_key: api_key,
-                                   custom_hosts: custom_hosts)
+        client = Idnow::Client.new(
+          env: env, company_id: company_id, api_key: api_key,
+          options: { hosts: custom_hosts }
+        )
 
         expect(client.instance_variable_get(:@host)).to eq 'test.host.idnow'
         expect(client.instance_variable_get(:@target_host))

@@ -21,28 +21,29 @@ module Idnow
 
     attr_reader :host
 
-    def initialize(env:, company_id:, api_key:, timeout: nil, custom_hosts: nil)
+    # options keys:
+    # :hosts
+    # :sftp_client_options
+    def initialize(env:, company_id:, api_key:, options: {})
       fail 'Please set env to :test or :live' unless Idnow::ENVIRONMENTS.keys.include?(env)
       fail 'Please set your company_id' if company_id.nil?
       fail 'Please set your api_key' if api_key.nil?
-      set_hosts(env, custom_hosts)
+      set_hosts(env, options[:hosts])
       @company_id  = company_id
       @api_key     = api_key
 
       @http_client = HttpClient.new(host: @host)
 
-      sftp_client_options = { host: @host, username: @company_id, password: @api_key }
-      sftp_client_options[:timeout] = timeout if timeout
+      sftp_client_options = options[:sftp_client_options] || {}
+      sftp_client_options.merge!(host: @host, username: @company_id, password: @api_key)
       @sftp_client = SftpClient.new(sftp_client_options)
     end
 
     private
 
-    def set_hosts(env, custom_hosts)
-      @host = custom_hosts.is_a?(Hash) && custom_hosts[:host] ||
-        Idnow::ENVIRONMENTS[env][:host]
-      @target_host = custom_hosts.is_a?(Hash) && custom_hosts[:target_host] ||
-        Idnow::ENVIRONMENTS[env][:target_host]
+    def set_hosts(env, hosts)
+      @host = hosts && hosts[:host] || Idnow::ENVIRONMENTS[env][:host]
+      @target_host = hosts && hosts[:target_host] || Idnow::ENVIRONMENTS[env][:target_host]
     end
 
     def execute(request, headers = {}, http_client: @http_client)
