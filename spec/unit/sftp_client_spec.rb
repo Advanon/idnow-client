@@ -53,16 +53,9 @@ RSpec.describe Idnow::SftpClient do
       allow(Net::SFTP).to receive(:start)
         .with(expected_sftp_host, username, password: password)
         .and_yield(sftp_double)
-      allow(sftp_client).to receive(:file_exists).and_return file_exists
-    end
-
-    context 'when the file does not exist' do
-      let(:file_exists) { false }
-      it { expect { subject }.to raise_error(Idnow::Exception) }
     end
 
     context 'when the file exists' do
-      let(:file_exists) { true }
       context 'when a sftp exception happens' do
         before do
           allow(sftp_double).to receive(:download!).and_raise(Net::SFTP::Exception)
